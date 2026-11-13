@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  LIBRARIAN
+  MEMBER
+}
+
+model Book {
+  id        Int      @id @default(autoincrement())
+  title     String
+  isbn      String   @unique
+  createdAt DateTime @default(now())
+  
+  // Relations
+  genres    Genre[]
+  reviews   Review[]
+}
+
+model Genre {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  books Book[] // Implicit many-to-many relation
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String
+  role      Role     @default(MEMBER)
+  createdAt DateTime @default(now())
+  
+  // Relations
+  reviews   Review[]
+}
+
+// STRETCH GOAL: Review Model
+model Review {
+  id        Int      @id @default(autoincrement())
+  rating    Int      // e.g., 1 to 5
+  comment   String?
+  createdAt DateTime @default(now())
+
+  // Relations
+  bookId    Int
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
