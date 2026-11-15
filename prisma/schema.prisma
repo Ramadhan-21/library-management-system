@@ -4,6 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL") // <-- ADDED THIS
 }
 
 enum Role {
@@ -13,26 +14,30 @@ enum Role {
 }
 
 model Book {
-  id        Int      @id @default(autoincrement())
-  title     String
-  isbn      String   @unique
-  createdAt DateTime @default(now())
+  id          Int      @id @default(autoincrement())
+  title       String
+  author      String   // <-- ADDED
+  isbn        String   @unique
+  totalCopies Int      // <-- ADDED
+  createdAt   DateTime @default(now())
   
   // Relations
-  genres    Genre[]
-  reviews   Review[]
+  genreId     Int      // <-- ADDED (Direct link for easy filtering)
+  genre       Genre    @relation(fields: [genreId], references: [id])
+  reviews     Review[]
 }
 
 model Genre {
   id    Int    @id @default(autoincrement())
   name  String @unique
-  books Book[] // Implicit many-to-many relation
+  books Book[] 
 }
 
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
   name      String
+  password  String   // <-- ADDED (Required for Auth)
   role      Role     @default(MEMBER)
   createdAt DateTime @default(now())
   
@@ -43,7 +48,7 @@ model User {
 // STRETCH GOAL: Review Model
 model Review {
   id        Int      @id @default(autoincrement())
-  rating    Int      // e.g., 1 to 5
+  rating    Int      
   comment   String?
   createdAt DateTime @default(now())
 
